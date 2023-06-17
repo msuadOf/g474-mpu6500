@@ -101,11 +101,11 @@ void MPU6500_Init()
     reg_buffer = MPU6500_ACCEL_FS_SEL_4g;
     MPU6500_Write(MPU6500_ACCEL_CONFIG, &reg_buffer, 1);
 
-    reg_buffer = 0;
-    do
-    {
-        MPU6500_Read(MPU6500_WHO_AM_I, &reg_buffer, 1);
-    } while (reg_buffer != 0x70);
+//    reg_buffer = 0;
+//    do
+//    {
+//        MPU6500_Read(MPU6500_WHO_AM_I, &reg_buffer, 1);
+//    } while (reg_buffer != 0x70);
 }
 
 /* 定义MPU6500六轴数据获取函数 */

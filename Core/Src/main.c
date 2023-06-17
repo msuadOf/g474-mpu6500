@@ -117,7 +117,20 @@ void usb_printf(const char *format, ...)
   va_end(args);
   CDC_Transmit_FS(UserTxBufferFS, length);
 }
+void io_send(){
+	HAL_GPIO_WritePin(out1_GPIO_Port, out1_Pin, 0);
+  //HAL_GPIO_WritePin(out2_GPIO_Port, out2_Pin, 0);
+  //HAL_GPIO_WritePin(out3_GPIO_Port, out3_Pin, 0);
+	HAL_GPIO_WritePin(check_GPIO_Port, check_Pin, 0);
+}
+void io_init(){
+  HAL_GPIO_WritePin(out1_GPIO_Port, out1_Pin, 1);
+  //HAL_GPIO_WritePin(out2_GPIO_Port, out2_Pin, 1);
+  //HAL_GPIO_WritePin(out3_GPIO_Port, out3_Pin, 1);
+	HAL_GPIO_WritePin(check_GPIO_Port, check_Pin, 1);
+}
 float g=0;
+int att=0;
 /* USER CODE END 0 */
 
 /**
@@ -161,9 +174,14 @@ int main(void)
   /* ???MPU6500 */
   MPU6500_Init();
 
-  HAL_GPIO_WritePin(out1_GPIO_Port, out1_Pin, 1);
-  HAL_GPIO_WritePin(out2_GPIO_Port, out2_Pin, 1);
-  HAL_GPIO_WritePin(out3_GPIO_Port, out3_Pin, 1);
+    MPU6500_get_buffer(gyro_buffer, acc_buffer);
+     g = sqrtf((acc_buffer[0]) * (acc_buffer[0]) +
+                    (acc_buffer[1]) * (acc_buffer[1]) +
+                    (acc_buffer[2]) * (acc_buffer[2]));
+
+
+	io_init();
+	HAL_Delay(100);
   while (1)
   {
     usb_printf("=============\n");
@@ -172,15 +190,15 @@ int main(void)
      g = sqrtf((acc_buffer[0]) * (acc_buffer[0]) +
                     (acc_buffer[1]) * (acc_buffer[1]) +
                     (acc_buffer[2]) * (acc_buffer[2]));
-     if (g < 1.5)
+     if (g < 0.6)
      {
-       HAL_GPIO_WritePin(out1_GPIO_Port, out1_Pin, 0);
-       HAL_GPIO_WritePin(out2_GPIO_Port, out2_Pin, 0);
-       HAL_GPIO_WritePin(out3_GPIO_Port, out3_Pin, 0);
-			 
-			 HAL_GPIO_WritePin(debug_GPIO_Port, debug_Pin, 1);
-    }else{
-			HAL_GPIO_WritePin(debug_GPIO_Port, debug_Pin, 0);
+       io_send();
+			 usb_printf("g<0.6\n");
+			 att=1;
+    }
+		usb_printf("g:%f,%d\n",g,att);
+		if(att){
+			usb_printf("===== action over ========\n");
 		}
 //          HAL_GPIO_WritePin(out1_GPIO_Port, out1_Pin, 1);
 //      HAL_GPIO_WritePin(out2_GPIO_Port, out2_Pin, 1);
@@ -189,7 +207,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     //HAL_GPIO_TogglePin(debug_GPIO_Port,debug_Pin);
-    //HAL_Delay(100);
+		
+	//HAL_GPIO_TogglePin(check_GPIO_Port, check_Pin);
+    //HAL_Delay(500);
   }
   /* USER CODE END 3 */
 }
